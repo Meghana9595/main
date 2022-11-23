@@ -26,7 +26,7 @@ resource "aws_internet_gateway" "gw" {
 }
 resource "aws_route_table" "table" {
   vpc_id = "${aws_vpc.demo.id}"
-route {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = "${aws_internet_gateway.gw.id}"
   }
@@ -63,16 +63,14 @@ resource "aws_security_group" "standard-sg" {
   }
 }
 resource "aws_instance" "ec2-instance" {
-
-    #aws_vpc = aws_vpc.Standard-Vpc.id
-    subnet_id     = aws_subnet.publicsubnets.id
-    ami = "ami-0b0dcb5067f052a63"
-   instance_type = "t2.micro"
-   count = 1
-   key_name = "mine-keypair"
-   vpc_security_group_ids = [aws_security_group.standard-sg.id]
-user_data = <<EOF
-    ! /bin/bash
+  subnet_id     = aws_subnet.publicsubnets.id
+  ami = "ami-0b0dcb5067f052a63"
+  instance_type = "t2.micro"
+  count = 1
+  key_name = "mine-keypair"
+  vpc_security_group_ids = [aws_security_group.standard-sg.id]
+  user_data = <<EOF
+    #!/usr/bin/env
     sudo apt-get update
     sudo apt-get install -y apache2
     sudo systemctl start apache2
@@ -89,7 +87,7 @@ resource "aws_security_group" "standard-sg02" {
   name        = "standard-sg02"
   description = "Allow only 3306 inbound traffic"
   vpc_id      = aws_vpc.demo.id
-ingress {
+  ingress {
     description      = "TLS from VPC"
     from_port        = 3306
     to_port          = 3306
@@ -98,10 +96,10 @@ ingress {
   }
 }
   resource "aws_db_subnet_group" "my-subnet01" {
-  name       = "db-subnet"
-  subnet_ids = [aws_subnet.privatesubnet1.id,aws_subnet.privatesubnet2.id]
-    tags = {
-    Name = "rds subnet"
+     name       = "db-subnet"
+     subnet_ids = [aws_subnet.privatesubnet1.id,aws_subnet.privatesubnet2.id]
+     tags = {
+        Name = "rds subnet"
   }
 }
 
@@ -131,5 +129,5 @@ resource "aws_db_instance" "mp-sql" {
   parameter_group_name = aws_db_parameter_group.basic.name
   skip_final_snapshot  = true
   db_subnet_group_name = aws_db_subnet_group.my-subnet01.id
- vpc_security_group_ids = [aws_security_group.standard-sg02.id]
+  vpc_security_group_ids = [aws_security_group.standard-sg02.id]
 }
